@@ -14,7 +14,7 @@ const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
             <div className='w-2/12 h-full bg-gray-900'></div>
             <div className='w-10/12 p-8 h-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto'>
                 {nodeTypes.map((i,ix)=>(
-                    <div onClick={()=>{handleSelectNewNode(i.name); setNewNodeMenu(false)}} className='rounded-md h-48 shrink-0 bg-gblack hover:bg-gray-900 transition-all cursor-pointer border border-gray-500 p-4'>
+                    <div key={ix} onClick={()=>{handleSelectNewNode(i.name); setNewNodeMenu(false)}} className='rounded-md h-48 shrink-0 bg-gblack hover:bg-gray-900 transition-all cursor-pointer border border-gray-500 p-4'>
                         <span className='text-white text-xl'>{i.name}</span>
                     </div>
                 ))}

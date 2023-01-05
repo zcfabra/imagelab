@@ -2,7 +2,7 @@ import React from 'react'
 
 const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
     const nodeTypes = [
-        {name: "HSV"},
+        {name: "HSL"},
         {name: "RGB"},
         {name: "Crop"},
         {name: "Caption"},

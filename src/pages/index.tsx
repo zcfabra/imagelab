@@ -5,18 +5,19 @@ import CustomNode from "../components/node";
 import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
 import FileNode from "../components/filenode";
 import NewNodeMenu from "../components/newnodemenu";
-import HSVNode from "../components/hsvnode";
+import HSLNode from "../components/hslnode";
 
 
 
 const nodeTypes = {
   fileNode: FileNode,
-  hsvNode: HSVNode,
+  hslNode: HSLNode,
 }
 
 const Home: NextPage = () => {
   const proOptions = { hideAttribution: true };
   const imgRef = useRef<HTMLCanvasElement>(null);
+  const [lastCreatedNode, setLastCreatedNode]= useState<number>(1);
   const [imageUtil, setImageUtil]= useState<HTMLImageElement>()
   const [photoData,setPhotoData] = useState<any>(null);
   const [newNodeMenu, setNewNodeMenu] = useState<boolean>(false);
@@ -43,23 +44,25 @@ const Home: NextPage = () => {
     }])
   },[])
   useEffect(() => {
-    if (nodes[nodes.length - 1] && nodes[nodes.length - 1]?.data.imgData) {
+    console.log("HRM")
+    const doTheThing= async (blob:Blob)=>{
+      console.log(blob)
+      const bitmap = await createImageBitmap(blob);
+      console.log(nodes)
+      console.log("BITMAP", bitmap)
+      imgRef.current!.width = 1000;
+      imgRef.current!.height=900;
+      imgRef.current?.getContext("2d")?.drawImage(bitmap,0,0)
+    }
+    if (nodes[nodes.length - 1] && nodes[nodes.length - 1]?.data.outputData) {
       console.log("HI")
-      imageUtil!.src = nodes[nodes.length - 1]!.data.imgData;
-      imageUtil!.onload = (e)=>{
-        console.log(e)
-        console.log(imageUtil);
-        imgRef.current!.width = imageUtil!.width;
-        imgRef.current!.height = imageUtil!.height;
-        imgRef.current?.getContext("2d")?.drawImage(imageUtil!, 0,0)
-      }
+      let blob = nodes[nodes.length - 1]!.data.outputData;
+      doTheThing(blob)
+
+
     }
   }, [nodes]);
-  useEffect(() => {
-    console.log("IMAGEUTIL",imageUtil);
 
-
-  }, [imageUtil])
 
   const [edges, setEdges] = useState<Edge[]>([]);
   const onNodesChange = useCallback((changes: NodeChange[])=>{
@@ -71,7 +74,9 @@ const Home: NextPage = () => {
 
 
   const handleSelectNewNode = (nodeType:string)=>{
-    setNodes(prev=>prev.concat({id: String(Number(prev[prev.length-1]!.id)+1), dragHandle: ".drag-handle", selectable:true, position:{x: 0, y: 200}, data: {label: nodeType, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: "hsvNode"}))
+    let newID = lastCreatedNode + 1;
+    setNodes(prev=>prev.concat({id: String(newID) , dragHandle: ".drag-handle", selectable:true, position:{x: 0, y: 200}, data: {label: nodeType, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: "hslNode"}))
+    setLastCreatedNode(newID); 
   }
   const onConnect = useCallback(
     (connection: Connection) =>{

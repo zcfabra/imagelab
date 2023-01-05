@@ -48,19 +48,25 @@ const Home: NextPage = () => {
   useEffect(() => {
     console.log("lastNode:", nodes[nodes.length-1])
     const doTheThing= async (blob:Blob)=>{
-      // console.log(blob)
+      console.log("BLOB SIZE",blob.size)
       const bitmap = await createImageBitmap(blob);
       // console.log(nodes)
       // console.log("BITMAP", bitmap)
       imgRef.current!.width = 1000;
       imgRef.current!.height=900;
-      imgRef.current?.getContext("2d")?.drawImage(bitmap,0,0)
+      const ctx = imgRef.current?.getContext("2d");
+      if (ctx){
+        console.log("actually drawing")
+        ctx.clearRect(0,0,1000,900)
+        ctx.drawImage(bitmap,0,0)
+      } else {
+        console.log("failed to get context")
+      }
+      bitmap.close();
     }
     if (nodes[nodes.length - 1] && nodes[nodes.length - 1]?.data.outputData) {
       let blob = nodes[nodes.length - 1]!.data.outputData;
       doTheThing(blob)
-
-
     }
   }, [nodes]);
 

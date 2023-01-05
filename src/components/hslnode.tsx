@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import CustomNode from "./node"
 import { NodeProps } from './filenode'
-import { useReactFlow } from 'reactflow';
+import { Node, useReactFlow } from 'reactflow';
 
 interface HSLNodeProps{
     id: string, 
@@ -9,6 +9,9 @@ interface HSLNodeProps{
         label: string, 
         imgRef: React.RefObject<HTMLCanvasElement>,
         imgData: string | null | Blob,
+        childNode?: string,
+        setNodes:React.Dispatch<React.SetStateAction<Node[]>>
+
     },
     selected: boolean,
 
@@ -32,6 +35,7 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
 
     }
     useEffect(()=>{
+        console.log("HSLNODE")
         // if (window != undefined){
         let cvx  = offlineCanvasRef.current?.getContext("2d");
         if (cvx!= null && cvx!= undefined){
@@ -49,11 +53,19 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
                 cvx!.fillRect(0, 0, data.imgRef.current!.width, data.imgRef.current!.height);  // apply the comp filter
                 cvx!.globalCompositeOperation = "source-over";  // restore default comp
                 cvx?.canvas.toBlob(blob=>{
-                    setNodes(prev=>{
+                    data.setNodes(prev=>{
                         const idx = prev.findIndex(x=>x.id == id);
                         prev[idx]!.data = {
                             ...prev[idx]!.data,
                             outputData: blob
+                        };
+                        if (data.childNode) {
+                            const targetIdx = prev.findIndex((x) => x.id == data.childNode);
+                            // console.log("TARGETIDX", targetIdx, prev[targetIdx])
+                            prev[targetIdx]!.data = {
+                                ...prev[targetIdx]!.data,
+                                imgData: blob
+                            }
                         }
                         return [...prev]
                     })

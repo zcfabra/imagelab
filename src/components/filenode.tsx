@@ -15,6 +15,7 @@ const FileNode: React.FC<NodeProps> = ({ data ,id, selected}) => {
     // const {setNodes, getNodes} = useReactFlow();
     // console.log(data);
     const handle = async (e:React.ChangeEvent<HTMLInputElement>)=>{
+        console.log("FILENODE")
         console.log(e.target.files![0]!.name);
         if (e.target.files && e.target.files.length !=0){
             let file = e.target.files[0];
@@ -49,9 +50,9 @@ const FileNode: React.FC<NodeProps> = ({ data ,id, selected}) => {
                     prev[0]!.data!.imgData =blob 
                     if (data.childNode) {
                         const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                        console.log("TARGETIDX", targetIdx, prev[targetIdx])
+                        // console.log("TARGETIDX", targetIdx, prev[targetIdx])
                         prev[targetIdx]!.data = {
-                            ...prev[1]!.data,
+                            ...prev[targetIdx]!.data,
                             imgData: blob
                         }
                     }

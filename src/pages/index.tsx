@@ -4,14 +4,16 @@ import 'reactflow/dist/style.css';
 import CustomNode from "../components/node";
 import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
 import FileNode from "../components/filenode";
-import NewNodeMenu from "../components/newnodemenu";
+import NewNodeMenu, { nodeMap } from "../components/newnodemenu";
 import HSLNode from "../components/hslnode";
+import CropNode from "../components/cropnode";
 
 
 
 const nodeTypes = {
   fileNode: FileNode,
   hslNode: HSLNode,
+  cropNode: CropNode
 }
 
 const Home: NextPage = () => {
@@ -44,18 +46,17 @@ const Home: NextPage = () => {
     }])
   },[])
   useEffect(() => {
-    console.log("HRM")
+    console.log("lastNode:", nodes[nodes.length-1])
     const doTheThing= async (blob:Blob)=>{
-      console.log(blob)
+      // console.log(blob)
       const bitmap = await createImageBitmap(blob);
-      console.log(nodes)
-      console.log("BITMAP", bitmap)
+      // console.log(nodes)
+      // console.log("BITMAP", bitmap)
       imgRef.current!.width = 1000;
       imgRef.current!.height=900;
       imgRef.current?.getContext("2d")?.drawImage(bitmap,0,0)
     }
     if (nodes[nodes.length - 1] && nodes[nodes.length - 1]?.data.outputData) {
-      console.log("HI")
       let blob = nodes[nodes.length - 1]!.data.outputData;
       doTheThing(blob)
 
@@ -66,7 +67,7 @@ const Home: NextPage = () => {
 
   const [edges, setEdges] = useState<Edge[]>([]);
   const onNodesChange = useCallback((changes: NodeChange[])=>{
-    console.log("Changes",changes);
+    // console.log("Changes",changes);
     setNodes((prev)=>{
       return applyNodeChanges(changes, prev);
     })
@@ -75,7 +76,7 @@ const Home: NextPage = () => {
 
   const handleSelectNewNode = (nodeType:string)=>{
     let newID = lastCreatedNode + 1;
-    setNodes(prev=>prev.concat({id: String(newID) , dragHandle: ".drag-handle", selectable:true, position:{x: 0, y: 200}, data: {label: nodeType, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: "hslNode"}))
+    setNodes(prev=>prev.concat({id: String(newID) , dragHandle: ".drag-handle", selectable:true, position:{x: 0, y: nodes[nodes.length-1]!.position.y + 200}, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
     setLastCreatedNode(newID); 
   }
   const onConnect = useCallback(

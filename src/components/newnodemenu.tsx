@@ -1,9 +1,11 @@
 import React from 'react'
-
+export const nodeMap = {
+    "HSL": "hslNode",
+    "Crop": "cropNode"
+}
 const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
     const nodeTypes = [
         {name: "HSL"},
-        {name: "RGB"},
         {name: "Crop"},
         {name: "Caption"},
     ]

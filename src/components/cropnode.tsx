@@ -55,6 +55,7 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
 
         if (window != undefined && data.imgData != null){
             draw(data.imgData as Blob);
+            setCropZone(null)
         }
 
         
@@ -77,6 +78,14 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
                                 ...prev[idx]!.data,
                                 outputData: blob
                             }
+                            if (data.childNode) {
+                                const targetIdx = prev.findIndex((x) => x.id == data.childNode);
+                                // console.log("TARGETIDX", targetIdx, prev[targetIdx])
+                                prev[targetIdx]!.data = {
+                                    ...prev[targetIdx]!.data,
+                                    imgData: blob
+                                }
+                            }
                         }
                         return [...prev]
                     })
@@ -86,7 +95,7 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
         }
 
 
-    },[cropZone])
+    },[cropZone, localImage])
 
     const handleDrawBox= (e:React.MouseEvent<HTMLCanvasElement>)=>{
         if (startingDragPoint != null){
@@ -122,12 +131,33 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
             setCropZone({ x:startingDragPoint.x * scalingFactor, y: startingDragPoint.y * scalingFactor, width: (e.clientX - rect.left - startingDragPoint!.x) * scalingFactor, height:(e.clientY - rect.top - startingDragPoint!.y) * scalingFactor, scalingFactor:scalingFactor})
             setStartingDragPoint(null);
         }
-    }
+    };
+    const handleClearCrop=()=>{
+        setCropZone(null);
+        const ctx = localCanvasRef.current?.getContext("2d");
+        if (ctx){
+            ctx.clearRect(0, 0, localCanvasRef.current!.width, localCanvasRef.current!.height);
+            ctx.drawImage(localImage!,0,0);
+        }
+        
+        
+        setNodes(prev=>{
+            const idx = prev.findIndex(x=>x.id == id);
+            prev[idx]!.data = {
+                ...prev[idx]!.data,
+                outputData: data.imgData
+            }
+            return [...prev]
+        })
+    };
     return (
-      <CustomNode inputHandle selected={selected} id={id} data={data} overrideStyles={"!w-96 !h-96 !overflow-scroll"}>
-        <canvas className='cursor-crosshair' onMouseLeave={handleDragEnd} onMouseUp={handleDragEnd} onMouseDown={handleDragStart} onMouseMove={handleDrawBox} ref={localCanvasRef}></canvas>
+      <CustomNode inputHandle selected={selected} id={id} data={data} overrideStyles={"!w-96 !h-96 pt-8"}>
+        <canvas className='cursor-crosshair border-2 border-gray-500' onMouseLeave={handleDragEnd} onMouseUp={handleDragEnd} onMouseDown={handleDragStart} onMouseMove={handleDrawBox} ref={localCanvasRef}></canvas>
         <canvas hidden ref={localHiddenCanvasRef}></canvas>
-        <div className='w-6 h-6 bg-gray-800 rounded-md drag-handle absolute top-4 right-4'></div>
+        <div className='absolute top-4 right-4 flex flex-row items-center h-6'>
+            <button onClick={()=>handleClearCrop()}className='w-16 h-8 text-white border hover:bg-gray-900 transition-all rounded-md border-gray-500'>Clear</button>
+            <div className='w-6 h-6 ml-4 bg-gray-800 rounded-md drag-handle'></div>
+        </div>
       </CustomNode>
   )
 }

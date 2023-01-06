@@ -1,7 +1,7 @@
 import React, { ReactNode, memo } from 'react'
 import { Handle, Position } from 'reactflow'
 import { overrides } from '../../prettier.config.cjs'
-interface NodeProps{
+export interface NodeProps{
     data:any,
     children:ReactNode,
     inputHandle?: boolean,

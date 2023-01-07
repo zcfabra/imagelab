@@ -1,26 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
-import CustomNode from "./node"
+import CustomNode, { NodeData } from "./node"
 import { NodeProps } from './filenode'
 import { Node, useReactFlow } from 'reactflow';
+import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected';
 
 interface HSLNodeProps{
     id: string, 
-    data: { 
-        label: string, 
-        imgRef: React.RefObject<HTMLCanvasElement>,
-        imgData: string | null | Blob,
-        childNode?: string,
-        setNodes:React.Dispatch<React.SetStateAction<Node[]>>
-
-    },
+    data: NodeData,
     selected: boolean,
-
 }
 // type hslValues = { hue: number, saturation: number, lightness: number }
 const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
     const [hsl, setHsl]= useState({hue:0, saturation:100,lightness:50});
-    const [localImage, setLocalImage] = useState<string | null | Blob>(null);
-    const {setNodes} = useReactFlow();
     const offlineCanvasRef = useRef<HTMLCanvasElement>(null);
     
 
@@ -53,25 +44,22 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
                 cvx!.fillRect(0, 0, data.imgRef.current!.width, data.imgRef.current!.height);  // apply the comp filter
                 cvx!.globalCompositeOperation = "source-over";  // restore default comp
                 cvx?.canvas.toBlob(blob=>{
-                    data.setNodes(prev=>{
-                        const idx = prev.findIndex(x=>x.id == id);
-                        prev[idx]!.data = {
-                            ...prev[idx]!.data,
-                            outputData: blob
-                        };
-                        if (data.childNode) {
-                            const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                            // console.log("TARGETIDX", targetIdx, prev[targetIdx])
-                            prev[targetIdx]!.data = {
-                                ...prev[targetIdx]!.data,
-                                imgData: blob
-                            }
-                        }
-                        return [...prev]
-                    })
+                    if (blob){
+                        applyConnectedNodes(id,data,blob);
+                    }
                 })
             }
-            if (window !=undefined && data.imgData != null){doTheThing(data.imgData as Blob)}
+            if (window !=undefined){
+                if (data.imgData != null){
+                    doTheThing(data.imgData as Blob);
+                } else {
+                    data.setNodes(prev=>{
+                        console.log("PO")
+                        return clearConnectedNodes(prev,id,data);
+                    })
+                }
+
+            }
             // tempImage.onload = (e) => {
             //     offlineCanvasRef.current!.width = data.imgRef.current!.width
             //     offlineCanvasRef.current!.height = data.imgRef.current!.height

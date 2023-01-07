@@ -1,16 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
-import CustomNode from "./node"
+import CustomNode, { NodeData } from "./node"
 import { Node, rectToBox, useReactFlow } from 'reactflow'
 import { number } from 'zod'
 import { resolveTxt } from 'dns/promises'
 import { getNextInternalQuery } from 'next/dist/server/request-meta'
-const CropNode:React.FC<{selected:boolean,id:string, data:{
-    imgData: Blob | string | null,
-    imgRef: React.RefObject<HTMLCanvasElement>,
-    childNode: string,
-    setNodes: React.Dispatch<React.SetStateAction<Node[]>>
-
-}}> = ({selected, id, data}) => {
+import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected'
+const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selected, id, data}) => {
     const {setNodes} = useReactFlow();
     const [cropZone, setCropZone] = useState<{x:number, y:number, width: number,height:number, scalingFactor:number} | null>(null)
     const [localImage, setLocalImage] = useState<ImageBitmap>();
@@ -31,32 +26,24 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
 
                 }
                 ctx.canvas.toBlob(blob=>{
-                    data.setNodes(prev => {
-                        const idx = prev.findIndex(x => x.id == id);
-                        console.log("EXISTS", prev[idx])
-                        prev[idx]!.data = {
-                            ...prev[idx]!.data,
-                            outputData: blob
-                        };
-                        if (data.childNode) {
-                            const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                            // console.log("TARGETIDX", targetIdx, prev[targetIdx])
-                            prev[targetIdx]!.data = {
-                                ...prev[targetIdx]!.data,
-                                imgData: blob
-                            }
-                        }
-                        return [...prev]
-                    })
+                    if (blob){
+                        applyConnectedNodes(id, data, blob); 
+                    }
 
                 })
             }
         }
-
+        if (data.imgData == null){
+            localCanvasRef.current?.getContext("2d")?.clearRect(0,0,localCanvasRef.current.width, localCanvasRef.current.height);   
+            data.setNodes(prev=>{
+                return clearConnectedNodes(prev, id, data);
+            })
+        }
         if (window != undefined && data.imgData != null){
             draw(data.imgData as Blob);
             setCropZone(null)
         }
+
 
         
     }, [data.imgData]);
@@ -133,6 +120,9 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
         }
     };
     const handleClearCrop=()=>{
+        if (cropZone == null){
+            return;
+        }
         setCropZone(null);
         const ctx = localCanvasRef.current?.getContext("2d");
         if (ctx){
@@ -146,6 +136,15 @@ const CropNode:React.FC<{selected:boolean,id:string, data:{
             prev[idx]!.data = {
                 ...prev[idx]!.data,
                 outputData: data.imgData
+            };
+            if (prev[idx]!.data.childNode){
+                const targetIdx = prev.findIndex(x=>x.id == prev[idx]!.data.childNode);
+                if (targetIdx){
+                    prev[targetIdx]!.data ={
+                        ...prev[targetIdx]!.data,
+                        imgData: data.imgData
+                    }
+                }
             }
             return [...prev]
         })

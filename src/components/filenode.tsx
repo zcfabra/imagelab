@@ -1,72 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Node } from 'reactflow';
-import CustomNode from "./node";
+import CustomNode, { NodeData } from "./node";
+import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected';
 export interface NodeProps {
     id: string,
-    data: {
-        handleFileUpload: ()=>void,
-        outputData: string,
-        childNode: string,
-        setNodes:React.Dispatch<React.SetStateAction<Node[]>>
-    },
+    data: NodeData,
     selected:boolean
 }
 const FileNode: React.FC<NodeProps> = ({ data ,id, selected}) => {
     // const {setNodes, getNodes} = useReactFlow();
     // console.log(data);
+    const [fileUploaded, setFileUploaded] = useState<boolean>(false);
     const handle = async (e:React.ChangeEvent<HTMLInputElement>)=>{
         console.log("FILENODE")
-        console.log(e.target.files![0]!.name);
+        // console.log(e.target.files[0].name);
         if (e.target.files && e.target.files.length !=0){
             let file = e.target.files[0];
             if (file){
-                // const reader = new FileReader();
-                // reader.readAsDataURL(file);
-                // reader.onloadend = (e) => {
-                //     console.log(reader.result);
-                //     data.setNodes(prev => {
-                //         console.log(prev)
-                //         prev[0]!.data!.outputData = reader.result
-                //         prev[0]!.data!.imgData = reader.result
-                //         if (data.childNode) {
-                //             const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                //             console.log("TARGETIDX", targetIdx, prev[targetIdx])
-                //             prev[1]!.data = {
-                //                 ...prev[1]!.data,
-                //                 imgData: reader.result
-                //             }
-                //         }
-
-                //         return [...prev];
-                //     });
-                    
-                // }
-
                 let arraybuf = await file.arrayBuffer();
                 let blob = new Blob([new Uint8Array(arraybuf)]);
-                data.setNodes(prev=>{
-
-                    prev[0]!.data!.outputData = blob
-                    prev[0]!.data!.imgData =blob 
-                    if (data.childNode) {
-                        const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                        // console.log("TARGETIDX", targetIdx, prev[targetIdx])
-                        prev[targetIdx]!.data = {
-                            ...prev[targetIdx]!.data,
-                            imgData: blob
-                        }
-                    }
-
-                    return [...prev];
-                })
+                applyConnectedNodes(id, data,blob);
+                setFileUploaded(true);
             }
-        }
+        } else {}
         
+    }
+
+    const handleRemoveFile = ()=>{
+        data.setNodes(prev=>{
+            return clearConnectedNodes(prev, id, data);
+        })
+        setFileUploaded(false);
     }
     return (
         <CustomNode selected={selected} id={id} data={data}>
-            <input type="file" onChange={handle}/>
-            <button className='text-white' >Get Nodes</button>
+           {!fileUploaded ? <input type="file" onChange={handle}/> : <button onClick={()=>handleRemoveFile()} className='text-white'>Delete</button>}
         </CustomNode>
     )
 }

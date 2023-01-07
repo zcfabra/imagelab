@@ -1,13 +1,14 @@
 import React from 'react'
 export const nodeMap = {
     "HSL": "hslNode",
-    "Crop": "cropNode"
+    "Crop": "cropNode",
+    "Filter": "filterNode"
 }
 const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
     const nodeTypes = [
         {name: "HSL"},
         {name: "Crop"},
-        {name: "Caption"},
+        {name: "Filter"},
     ]
   return (
     <div  className='absolute z-30 w-full h-full flex flex-col items-center justify-center bg-[rgba(0,0,0,0.5)] '>

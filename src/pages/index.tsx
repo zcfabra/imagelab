@@ -7,17 +7,20 @@ import FileNode from "../components/filenode";
 import NewNodeMenu, { nodeMap } from "../components/newnodemenu";
 import HSLNode from "../components/hslnode";
 import CropNode from "../components/cropnode";
+import FilterNode from "../components/filternode";
 
 
 
 const nodeTypes = {
   fileNode: FileNode,
   hslNode: HSLNode,
-  cropNode: CropNode
+  cropNode: CropNode,
+  filterNode: FilterNode
 }
 
 const Home: NextPage = () => {
   const proOptions = { hideAttribution: true };
+  const [connectedNodes, setConnectedNodes] = useState<{ix: number, nullData: boolean}[]>([]);
   const imgRef = useRef<HTMLCanvasElement>(null);
   const [lastCreatedNode, setLastCreatedNode]= useState<number>(1);
   const [imageUtil, setImageUtil]= useState<HTMLImageElement>()
@@ -45,30 +48,66 @@ const Home: NextPage = () => {
         draggable: false,      
     }])
   },[])
+  
   useEffect(() => {
-    console.log("lastNode:", nodes[nodes.length-1])
-    const doTheThing= async (blob:Blob)=>{
-      console.log("BLOB SIZE",blob.size)
-      const bitmap = await createImageBitmap(blob);
-      // console.log(nodes)
-      // console.log("BITMAP", bitmap)
-      imgRef.current!.width = 1000;
-      imgRef.current!.height=900;
-      const ctx = imgRef.current?.getContext("2d");
-      if (ctx){
-        console.log("actually drawing")
-        ctx.clearRect(0,0,1000,900)
-        ctx.drawImage(bitmap,0,0)
-      } else {
-        console.log("failed to get context")
+    const doTheThing = async (blob: Blob) => {
+      console.log("BLOB:", blob)
+      if (blob != null) {
+        const bitmap = await createImageBitmap(blob);
+        imgRef.current!.width = 1000;
+        imgRef.current!.height = 900;
+        const ctx = imgRef.current?.getContext("2d");
+        if (ctx) {
+          console.log("Actually drawing, bitmap", blob)
+          ctx.clearRect(0, 0, 1000, 900)
+          if (!connectedNodes[connectedNodes.length - 1]!.nullData){
+            console.log("STATE OF NODES AT DRAW CALL", connectedNodes)
+            ctx.drawImage(bitmap, 0, 0);
+
+
+          }
+          
+        } else {
+          console.log("failed to get context")
+        }
+
       }
-      bitmap.close();
+
     }
-    if (nodes[nodes.length - 1] && nodes[nodes.length - 1]?.data.outputData) {
-      let blob = nodes[nodes.length - 1]!.data.outputData;
-      doTheThing(blob)
+
+    if (connectedNodes.length != 0){
+      if (connectedNodes[connectedNodes.length-1]!.nullData == true){
+        console.log("CLEAR");
+        imgRef.current?.getContext("2d")?.clearRect(0, 0, imgRef.current.width, imgRef.current.height);
+      } else if (connectedNodes[connectedNodes.length-1] && !connectedNodes[connectedNodes.length-1]!.nullData) {
+        console.log(connectedNodes[connectedNodes.length-1], nodes[connectedNodes[connectedNodes.length-1]!.ix])
+        let blob = nodes[connectedNodes[connectedNodes.length - 1]!.ix]!.data.outputData;
+        doTheThing(blob);
+      }
+
+
+
+    
+    } 
+  }, [connectedNodes]);
+  useEffect(()=>{
+    console.log("NODES",nodes)
+    const out = [];
+
+    for (const [ix, node] of nodes.entries()){
+      let nullData: boolean;
+      if (nodes[0]!.data.outputData== null){
+        nullData = true;
+      } else {
+        nullData = node.data.outputData == null;
+      }
+      console.log("YOP",node.data, nullData);
+      if (node.data.parentNode || node.id=="1"){
+        out.push({ix:ix, nullData:nullData})
+      }
     }
-  }, [nodes]);
+    setConnectedNodes(out)
+  },[nodes])
 
 
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -82,7 +121,10 @@ const Home: NextPage = () => {
 
   const handleSelectNewNode = (nodeType:string)=>{
     let newID = lastCreatedNode + 1;
-    setNodes(prev=>prev.concat({id: String(newID) , dragHandle: ".drag-handle", selectable:true, position:{x: 0, y: nodes[nodes.length-1]!.position.y + 200}, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
+    console.log("TYPE:",nodes[nodes.length-1]?.type)
+    let lastNode = nodes[nodes.length-1];
+    console.log("GG",lastNode);
+    setNodes(prev => prev.concat({ id: String(newID), dragHandle: ".drag-handle", selectable: true, position: { x: prev[prev.length - 1]!.position.x, y: prev[prev.length - 1]!.position.y +( prev[prev.length - 1]!.type! == "cropNode" ?  450 : 200) }, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
     setLastCreatedNode(newID); 
   }
   const onConnect = useCallback(
@@ -91,7 +133,7 @@ const Home: NextPage = () => {
       setNodes(prev=>{
         const targetIdx = prev.findIndex(x=>x.id == connection.target);
         const sourceIdx = prev.findIndex(x=>x.id == connection.source);
-        console.log("FIRED")
+        console.log("FIRED", sourceIdx, targetIdx)
         return prev.map((i,ix)=>{
           if (ix == targetIdx) {
            i.data = {

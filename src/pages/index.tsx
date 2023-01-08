@@ -8,6 +8,7 @@ import NewNodeMenu, { nodeMap } from "../components/newnodemenu";
 import HSLNode from "../components/hslnode";
 import CropNode from "../components/cropnode";
 import FilterNode from "../components/filternode";
+import MLNode from "../components/mlnode";
 
 
 
@@ -15,7 +16,8 @@ const nodeTypes = {
   fileNode: FileNode,
   hslNode: HSLNode,
   cropNode: CropNode,
-  filterNode: FilterNode
+  filterNode: FilterNode,
+  mlNode: MLNode
 }
 
 const Home: NextPage = () => {
@@ -162,7 +164,7 @@ const Home: NextPage = () => {
     <main className="w-screen h-screen fixed bg-black">
       {newNodeMenu && <NewNodeMenu setNewNodeMenu={setNewNodeMenu} handleSelectNewNode={handleSelectNewNode}/>}
       <div className="relative w-9/12 h-full bg-black border border-gray-500">
-        <button className="z-20 hover:bg-gray-900 transition-all w-32 h-12 rounded-md text-white border border-gray-500 bg-black absolute right-2 top-2" onClick={()=>setNewNodeMenu(true)}>New +</button>
+        { nodes[0]?.data.outputData && <button className="z-20 hover:bg-gray-900 transition-all w-32 h-12 rounded-md text-white border border-gray-500 bg-black absolute right-2 top-2" onClick={()=>setNewNodeMenu(true)}>New +</button>}
         <ReactFlow
             proOptions={proOptions}
             nodes={nodes}

@@ -56,7 +56,9 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
             
             const ctx= localHiddenCanvasRef.current?.getContext("2d");
             if (ctx){
-                ctx.drawImage(localImage!, cropZone!.x, cropZone!.y, cropZone.width, cropZone.height, 0, 0, localCanvasRef.current!.width, localCanvasRef.current!.height);
+                localHiddenCanvasRef.current!.width = cropZone.width;
+                localHiddenCanvasRef.current!.height = cropZone.height;
+                ctx.drawImage(localImage!, cropZone!.x, cropZone!.y, cropZone.width, cropZone.height, 0, 0, cropZone.width, cropZone.height);
                 ctx.canvas.toBlob((blob)=>{
                     data.setNodes(prev=>{
                         const idx = prev.findIndex(x=>x.id == id);

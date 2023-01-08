@@ -38,6 +38,7 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
             offlineCanvasRef.current!.height = data.imgRef.current!.height
             const doTheThing = async(blob:Blob)=>{
                 const bitmap = await createImageBitmap(blob);
+                cvx?.clearRect(0,0, offlineCanvasRef.current!.width, offlineCanvasRef.current!.height);
                 cvx?.drawImage(bitmap,0,0);
                 cvx!.globalCompositeOperation = "saturation";
                 cvx!.fillStyle = `hsl(${hsl.hue},${hsl.saturation}%,${hsl.lightness}%)`;  // saturation at 100%

@@ -9,6 +9,7 @@ import HSLNode from "../components/hslnode";
 import CropNode from "../components/cropnode";
 import FilterNode from "../components/filternode";
 import MLNode from "../components/mlnode";
+import BGNode from "../components/bgnode";
 
 
 
@@ -17,7 +18,8 @@ const nodeTypes = {
   hslNode: HSLNode,
   cropNode: CropNode,
   filterNode: FilterNode,
-  mlNode: MLNode
+  mlNode: MLNode,
+  bgNode: BGNode
 }
 
 const Home: NextPage = () => {
@@ -25,8 +27,6 @@ const Home: NextPage = () => {
   const [connectedNodes, setConnectedNodes] = useState<{ix: number, nullData: boolean}[]>([]);
   const imgRef = useRef<HTMLCanvasElement>(null);
   const [lastCreatedNode, setLastCreatedNode]= useState<number>(1);
-  const [imageUtil, setImageUtil]= useState<HTMLImageElement>()
-  const [photoData,setPhotoData] = useState<any>(null);
   const [newNodeMenu, setNewNodeMenu] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<number|null>(null);
   const selectedRef = useRef<number|null>(null);
@@ -40,7 +40,6 @@ const Home: NextPage = () => {
 
   useEffect(()=>{
 
-    setImageUtil(new Image())
     setNodes(prev=>[...prev, {
         id: "1",
         position: { x: 0, y: 0 },
@@ -157,6 +156,25 @@ const Home: NextPage = () => {
     [setEdges]
   );
 
+  const onNodesDelete = useCallback((deletion: Node[])=>{
+    const deletedNode = deletion[0];
+    if (deletedNode && deletedNode.parentNode){
+      setNodes(prev=>{
+        const parentIx = prev.findIndex(x=>x.id == deletedNode.parentNode);
+        console.log("DELETED PARENT:", parentIx)
+        if (prev[parentIx] !=null && prev[parentIx] !=undefined){
+          prev[parentIx]!.data = {
+            ...prev[parentIx]?.data,
+            childNode: null
+
+          }
+        }
+         
+        return [...prev]
+      })
+    }
+  }, [setNodes])
+
 
   return (
 
@@ -172,6 +190,7 @@ const Home: NextPage = () => {
             onNodesChange={onNodesChange}
             edges={edges}
             onConnect={onConnect}
+            onNodesDelete={onNodesDelete}
 
 >
           <Background />

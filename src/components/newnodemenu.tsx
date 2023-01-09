@@ -3,14 +3,16 @@ export const nodeMap = {
     "HSL": "hslNode",
     "Crop": "cropNode",
     "Filter": "filterNode",
-    "ML": "mlNode"
+    "Enhance": "mlNode",
+    "BG Removal": "bgNode"
 }
 const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
     const nodeTypes = [
         {name: "HSL"},
         {name: "Crop"},
         {name: "Filter"},
-        {name: "ML"}
+        {name: "Enhance"},
+        {name: "BG Removal"}
     ]
   return (
     <div  className='absolute z-30 w-full h-full flex flex-col items-center justify-center bg-[rgba(0,0,0,0.5)] '>

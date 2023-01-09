@@ -60,24 +60,9 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
                 localHiddenCanvasRef.current!.height = cropZone.height;
                 ctx.drawImage(localImage!, cropZone!.x, cropZone!.y, cropZone.width, cropZone.height, 0, 0, cropZone.width, cropZone.height);
                 ctx.canvas.toBlob((blob)=>{
-                    data.setNodes(prev=>{
-                        const idx = prev.findIndex(x=>x.id == id);
-                        if (idx){
-                            prev[idx]!.data = {
-                                ...prev[idx]!.data,
-                                outputData: blob
-                            }
-                            if (data.childNode) {
-                                const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-                                // console.log("TARGETIDX", targetIdx, prev[targetIdx])
-                                prev[targetIdx]!.data = {
-                                    ...prev[targetIdx]!.data,
-                                    imgData: blob
-                                }
-                            }
-                        }
-                        return [...prev]
-                    })
+                    if (blob){
+                        applyConnectedNodes(id,data,blob);
+                    }
                 })
             }
             
@@ -139,9 +124,9 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
                 ...prev[idx]!.data,
                 outputData: data.imgData
             };
-            if (prev[idx]!.data.childNode){
+            if (prev[idx]!.data.childNode !=null){
                 const targetIdx = prev.findIndex(x=>x.id == prev[idx]!.data.childNode);
-                if (targetIdx){
+                if (prev[targetIdx] !=null && prev[targetIdx]!=undefined){
                     prev[targetIdx]!.data ={
                         ...prev[targetIdx]!.data,
                         imgData: data.imgData

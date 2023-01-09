@@ -7,12 +7,13 @@ export function clearConnectedNodes(prev: Node[], id:string, data:NodeData){
         ...prev[idx]!.data,
         outputData: null
     }
-    if (data.childNode) {
+    if (data.childNode !=null) {
         const childIdx = prev.findIndex(x => x.id == data.childNode);
-        prev[childIdx]!.data = {
-            ...prev[childIdx]!.data,
-            imgData: null
-
+        if (prev[childIdx] !=null && prev[childIdx] !=undefined){
+            prev[childIdx]!.data = {
+                ...prev[childIdx]!.data,
+                imgData: null
+            }
         }
     }
     return [...prev];
@@ -25,11 +26,13 @@ export function applyConnectedNodes(id:string, data:NodeData, blob: Blob){
             ...prev[idx]!.data,
             outputData: blob
         };
-        if (data.childNode) {
+        if (data.childNode !=null) {
             const targetIdx = prev.findIndex((x) => x.id == data.childNode);
-            prev[targetIdx]!.data = {
-                ...prev[targetIdx]!.data,
-                imgData: blob
+            if (prev[targetIdx]!=null && prev[targetIdx]!=undefined) {
+                prev[targetIdx]!.data = {
+                    ...prev[targetIdx]!.data,
+                    imgData: blob
+                }
             }
         }
         return [...prev];

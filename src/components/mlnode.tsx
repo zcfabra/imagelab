@@ -64,7 +64,7 @@ const MLNode:React.FC<{data: NodeData, id:string, selected: boolean}> = ({ data,
     }
     return (
     <CustomNode data={data} id={id} inputHandle selected={selected}>
-       <button className="text-white"onClick={()=>handleApplyModel()}>YAYA</button> 
+       { data.imgData != null && <button className="mt-auto text-white w-24 h-8 rounded-md border hover:bg-gray-900 transition-all border-gray-500 "onClick={()=>handleApplyModel()}>Apply</button> }
        <canvas hidden ref={localHiddenCanvasRef}></canvas>
         <div className='absolute top-4 right-4 w-6 h-6 ml-4 bg-gray-800 rounded-md drag-handle'></div>
     </CustomNode>

@@ -10,6 +10,7 @@ import CropNode from "../components/cropnode";
 import FilterNode from "../components/filternode";
 import MLNode from "../components/mlnode";
 import BGNode from "../components/bgnode";
+import ClassificationNode from "../components/classificationnode";
 
 
 
@@ -19,7 +20,8 @@ const nodeTypes = {
   cropNode: CropNode,
   filterNode: FilterNode,
   mlNode: MLNode,
-  bgNode: BGNode
+  bgNode: BGNode,
+  classificationNode: ClassificationNode
 }
 
 const Home: NextPage = () => {

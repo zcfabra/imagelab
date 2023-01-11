@@ -126,8 +126,14 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
         setCropZone(null);
         const ctx = localCanvasRef.current?.getContext("2d");
         if (ctx){
+            const bound = localCanvasRef.current!.getBoundingClientRect();
+            const scalingFactor = Math.min(bound.width / localImage!.width, bound.height / localImage!.height);
+            const newWidth = scalingFactor * localImage!.width;
+            const newHeight = scalingFactor * localImage!.height;
+            const x = (localCanvasRef.current!.width / 2) - (newWidth / 2);
+            const y = (localCanvasRef.current!.height / 2) - (newHeight / 2);
             ctx.clearRect(0, 0, localCanvasRef.current!.width, localCanvasRef.current!.height);
-            ctx.drawImage(localImage!,0,0);
+            ctx.drawImage(localImage, x,y,newWidth,newHeight);
         }
         
         

@@ -138,7 +138,7 @@ const Home: NextPage = () => {
     console.log("TYPE:",nodes[nodes.length-1]?.type)
     let lastNode = nodes[nodes.length-1];
     console.log("GG",lastNode);
-    setNodes(prev => prev.concat({ id: String(newID), dragHandle: ".drag-handle", selectable: true, position: { x: prev[prev.length - 1]!.position.x, y: prev[prev.length - 1]!.position.y +( prev[prev.length - 1]!.type! == "cropNode" ?  450 : 200) }, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
+    setNodes(prev => prev.concat({ id: String(newID), dragHandle: ".drag-handle", selectable: true, position: { x: prev[prev.length - 1]!.position.x, y: prev[prev.length - 1]!.position.y +( prev[prev.length - 1]!.type! == "cropNode" ?  550 : 200) }, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
     setLastCreatedNode(newID); 
   }
   const onConnect = useCallback(

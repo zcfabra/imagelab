@@ -25,6 +25,7 @@ const MLNode:React.FC<{data: NodeData, id:string, selected: boolean}> = ({ data,
 
     useEffect(()=>{
         if (data.imgData == null){
+            console.log("ESR CLEARED")
             data.setNodes(prev=>clearConnectedNodes(prev, id, data));
 
         } else {
@@ -34,11 +35,12 @@ const MLNode:React.FC<{data: NodeData, id:string, selected: boolean}> = ({ data,
     
     const handleApplyModel = async ()=>{
         if (data.imgData !=null){
+            console.log("CALLED MODEL ESR")
             const bitmap = await createImageBitmap(data.imgData);
             // let input = tf.browser.fromPixels(bitmap).div(tf.scalar(255)).toFloat();
             let input = tf.browser.fromPixels(bitmap).toFloat();
 
-            console.log(data.imgData.size, input.shape)
+            // console.log(data.imgData.size, input.shape)
             input = tf.expandDims(input, 0);
             if (model){
                 const out: tf.Tensor<tf.Rank> = model.predict(input) as tf.Tensor<tf.Rank>;
@@ -47,12 +49,17 @@ const MLNode:React.FC<{data: NodeData, id:string, selected: boolean}> = ({ data,
                 localHiddenCanvasRef.current!.width= out.shape[1]!;
                 localHiddenCanvasRef.current!.height = out.shape[2]!;
                 const reshaped: tf.Tensor<tf.Rank.R3> = out.squeeze([0]);
-                console.log(await reshaped.min().data(),await reshaped.max().data());
+                // console.log(await reshaped.min().data(),await reshaped.max().data());
 
                 const norm = reshaped.sub(reshaped.min()).div(reshaped.max().sub(reshaped.min()));
                 await tf.browser.toPixels(norm as tf.Tensor<tf.Rank.R3>, localHiddenCanvasRef.current!);
+                norm.dispose();
+                input.dispose();
+
+                bitmap.close();
                 localHiddenCanvasRef.current!.toBlob(blob=>{
                     if (blob){
+                        console.log("BLOB ADDED ")
                         applyConnectedNodes(id, data, blob);
                     }
                 })

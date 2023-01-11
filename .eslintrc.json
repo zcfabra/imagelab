@@ -7,5 +7,12 @@
   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "warn"
-  }
+  },
+//   "prefer-const": [
+//     "error",
+//     {
+//       "destructuring": "any",
+//       "ignoreReadBeforeAssign": false
+//     }
+//   ]
 }

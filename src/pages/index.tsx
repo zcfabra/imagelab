@@ -54,18 +54,18 @@ const Home: NextPage = () => {
   
   useEffect(() => {
     const doTheThing = async (blob: Blob) => {
-      console.log("BLOB:", blob)
+      // console.log("BLOB:", blob)
       if (blob != null) {
         const bitmap = await createImageBitmap(blob);
         // imgRef.current!.width = 1000;
         // imgRef.current!.height = 900;
         const ctx = imgRef.current?.getContext("2d");
         if (ctx) {
-          console.log("Actually drawing, bitmap", blob)
+          // console.log("Actually drawing, bitmap", blob)
           // ctx.clearRect(0, 0, 1000, 900)
           if (!connectedNodes[connectedNodes.length - 1]!.nullData){
-            console.log("STATE OF NODES AT DRAW CALL", connectedNodes);
-            console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
+            // console.log("STATE OF NODES AT DRAW CALL", connectedNodes);
+            // console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
             const bound = imgRef.current!.getBoundingClientRect();
             const scalingFactor = Math.min(bound.width / bitmap.width, bound.height/ bitmap.height);
             imgRef.current!.width = bound.width;
@@ -74,8 +74,8 @@ const Home: NextPage = () => {
             const newHeight = bitmap.height * scalingFactor;
             let x = (imgRef.current!.width / 2) - (newWidth / 2);
             let y = (imgRef.current!.height / 2) - (newHeight / 2);
-            console.log("BOUND", imgRef.current!.width, imgRef.current!.height);
-            console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
+            // console.log("BOUND", imgRef.current!.width, imgRef.current!.height);
+            // console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
             ctx.drawImage(bitmap, x,y,newWidth, newHeight);
 
 
@@ -115,11 +115,12 @@ const Home: NextPage = () => {
       } else {
         nullData = node.data.outputData == null;
       }
-      console.log("YOP",node.data, nullData);
+      // console.log("YOP",node.data, nullData);
       if (node.data.parentNode || node.id=="1"){
         out.push({ix:ix, nullData:nullData})
       }
     }
+    console.log("CONNECTED NODES: ", out);
     setConnectedNodes(out)
   },[nodes])
 
@@ -146,6 +147,7 @@ const Home: NextPage = () => {
       setEdges((eds) => addEdge(connection, eds));
       setNodes(prev=>{
         const targetIdx = prev.findIndex(x=>x.id == connection.target);
+      
         const sourceIdx = prev.findIndex(x=>x.id == connection.source);
         console.log("FIRED", sourceIdx, targetIdx)
         return prev.map((i,ix)=>{
@@ -171,17 +173,34 @@ const Home: NextPage = () => {
 
   const onNodesDelete = useCallback((deletion: Node[])=>{
     const deletedNode = deletion[0];
-    if (deletedNode && deletedNode.parentNode){
+    console.log("DELETED:", deletedNode);
+    if (deletedNode ){
       setNodes(prev=>{
-        const parentIx = prev.findIndex(x=>x.id == deletedNode.parentNode);
-        console.log("DELETED PARENT:", parentIx)
-        if (prev[parentIx] !=null && prev[parentIx] !=undefined){
-          prev[parentIx]!.data = {
-            ...prev[parentIx]?.data,
-            childNode: null
+        if (deletedNode.data.parentNode){
 
+          const parentIx = prev.findIndex(x=>x.id == deletedNode.data.parentNode);
+          console.log("DELETED PARENT:", parentIx)
+          if (prev[parentIx] !=null && prev[parentIx] !=undefined){
+            prev[parentIx]!.data = {
+              ...prev[parentIx]?.data,
+              childNode: null
+
+            }
           }
         }
+
+        if (deletedNode.data.childNode){
+          const childIx = prev.findIndex(x=>x.id == deletedNode.data.childNode);
+          console.log("DELETED CHILD:",childIx);
+          if (prev[childIx] != null && prev[childIx] != undefined){
+            prev[childIx]!.data = {
+              ...prev[childIx]!.data,
+              parentNode: null,
+              imgData: null,
+            }
+          }
+        }
+
          
         return [...prev]
       })

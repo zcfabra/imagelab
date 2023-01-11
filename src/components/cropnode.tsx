@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import CustomNode, { NodeData } from "./node"
-import { Node, rectToBox, useReactFlow } from 'reactflow'
+import { useReactFlow } from 'reactflow'
 import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected'
 const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selected, id, data}) => {
     const {setNodes} = useReactFlow();
@@ -16,12 +16,12 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
             const ctx = localCanvasRef.current?.getContext("2d");
             const bound = localCanvasRef.current!.getBoundingClientRect();
             if (ctx){
-                const scalingFactor = Math.min(bound.width / bitmap.width, bound.height / bitmap.height);
+                const scalingFactor = Math.min(2000 / bitmap.width, 2000 / bitmap.height);
                 const newWidth = bitmap.width * scalingFactor; const newHeight = bitmap.height * scalingFactor;
-                localCanvasRef.current!.width = bound.width;
-                localCanvasRef.current!.height = bound.height; 
-                const x = (localCanvasRef.current!.width / 2) - (newWidth / 2);
-                const y = (localCanvasRef.current!.height / 2) - (newHeight / 2);
+                localCanvasRef.current!.width = 2000;
+                localCanvasRef.current!.height = 2000; 
+                const x = (2000 / 2) - (newWidth / 2);
+                const y = (2000 / 2) - (newHeight / 2);
                 ctx.drawImage(bitmap,x,y,newWidth, newHeight);
                 setLocalImage(bitmap);
                 ctx.canvas.toBlob(blob=>{
@@ -53,16 +53,16 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
             const ctx= localHiddenCanvasRef.current?.getContext("2d");
             const bound = localCanvasRef.current!.getBoundingClientRect();
             if (ctx){
-                const realScale= Math.max(localImage.width / bound.width, localImage.height / bound.height);
+                const realScale= Math.max(localImage.width / localCanvasRef.current!.width, localImage.height / localCanvasRef.current!.height);
                 const scalingFactorX = realScale
                 const scalingFactorY = realScale;
 
                 localHiddenCanvasRef.current!.width = cropZone.width * scalingFactorX;
                 localHiddenCanvasRef.current!.height = cropZone.height * scalingFactorY;
                 
-                const originalScale = Math.min(bound.width / localImage.width , bound.height / localImage.height);
-                const x = ((bound.width/2)-(localImage.width * originalScale / 2)   ) * 1;
-                const y = ((bound.height/2) - (localImage.height * originalScale / 2)   ) * 1;
+                const originalScale = Math.min(localCanvasRef.current!.width / localImage.width , localCanvasRef.current!.height / localImage.height);
+                const x = ((localCanvasRef.current!.width/2)-(localImage.width * originalScale / 2)   ) * 1;
+                const y = ((localCanvasRef.current!.height/2) - (localImage.height * originalScale / 2)   ) * 1;
 
                 ctx.drawImage(localImage, (cropZone.x - x ) * scalingFactorX, (cropZone.y - y) * scalingFactorY, cropZone.width * scalingFactorX, cropZone.height * scalingFactorY, 0,0, cropZone.width * scalingFactorX, cropZone.height * scalingFactorY)
 
@@ -81,8 +81,8 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
     const handleDrawBox= (e:React.MouseEvent<HTMLCanvasElement>)=>{
         if (startingDragPoint != null){
             const ctx= localCanvasRef.current?.getContext('2d');
-            const bound = localCanvasRef.current!.getBoundingClientRect();
-            const scalingFactor = Math.min(bound.width / localImage!.width, bound.height / localImage!.height);
+            // const bound = localCanvasRef.current!.getBoundingClientRect();
+            const scalingFactor = Math.min(localCanvasRef.current!.width / localImage!.width, localCanvasRef.current!.height / localImage!.height);
             const newWidth = scalingFactor * localImage!.width;
             const newHeight = scalingFactor * localImage!.height;
             const x = (localCanvasRef.current!.width / 2) - (newWidth / 2);
@@ -97,7 +97,8 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
                 ctx.strokeStyle = "red";
                 const scalingFactor = localCanvasRef.current!.width / rect.width;
                 ctx.rect(startingDragPoint.x * scalingFactor, startingDragPoint.y *scalingFactor, (e.clientX - rect.left - startingDragPoint.x) * scalingFactor, (e.clientY - rect.top  - startingDragPoint.y) * scalingFactor);
-                ctx.stroke()
+                ctx.lineWidth = 10; 
+                ctx.stroke();
                 ctx.closePath()
             }
 
@@ -127,13 +128,13 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
         const ctx = localCanvasRef.current?.getContext("2d");
         if (ctx){
             const bound = localCanvasRef.current!.getBoundingClientRect();
-            const scalingFactor = Math.min(bound.width / localImage!.width, bound.height / localImage!.height);
+            const scalingFactor = Math.min(localCanvasRef.current!.width / localImage!.width, localCanvasRef.current!.height / localImage!.height);
             const newWidth = scalingFactor * localImage!.width;
             const newHeight = scalingFactor * localImage!.height;
             const x = (localCanvasRef.current!.width / 2) - (newWidth / 2);
             const y = (localCanvasRef.current!.height / 2) - (newHeight / 2);
             ctx.clearRect(0, 0, localCanvasRef.current!.width, localCanvasRef.current!.height);
-            ctx.drawImage(localImage, x,y,newWidth,newHeight);
+            ctx.drawImage(localImage!, x,y,newWidth,newHeight);
         }
         
         

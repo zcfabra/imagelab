@@ -11,39 +11,28 @@ interface HSLNodeProps{
 }
 // type hslValues = { hue: number, saturation: number, lightness: number }
 const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
-    const [hsl, setHsl]= useState({hue:0, saturation:100,lightness:50});
+    const [hsl, setHsl]= useState(100);
     const offlineCanvasRef = useRef<HTMLCanvasElement>(null);
     
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
         console.log(e.target.name, e.target.value)
-        setHsl(prev=>{
-            return {
-                ...prev,
-                [e.target.name]: e.target.value
-            }
-        })
+        setHsl(Number(e.target.value));
 
     }
     useEffect(()=>{
-        console.log("HSLNODE")
         // if (window != undefined){
         let cvx  = offlineCanvasRef.current?.getContext("2d");
         if (cvx!= null && cvx!= undefined){
-            // const tempImage = new Image();
-            // tempImage.src = localImage!;
-            let imgOutData: string;
-
-            offlineCanvasRef.current!.width = data.imgRef.current!.width
-            offlineCanvasRef.current!.height = data.imgRef.current!.height
             const doTheThing = async(blob:Blob)=>{
                 const bitmap = await createImageBitmap(blob);
+                offlineCanvasRef.current!.width = bitmap.width;
+                offlineCanvasRef.current!.height = bitmap.height;
                 cvx?.clearRect(0,0, offlineCanvasRef.current!.width, offlineCanvasRef.current!.height);
+                cvx!.filter = `saturate(${hsl}%)`;
                 cvx?.drawImage(bitmap,0,0);
-                cvx!.globalCompositeOperation = "saturation";
-                cvx!.fillStyle = `hsl(${hsl.hue},${hsl.saturation}%,${hsl.lightness}%)`;  // saturation at 100%
-                cvx!.fillRect(0, 0, data.imgRef.current!.width, data.imgRef.current!.height);  // apply the comp filter
-                cvx!.globalCompositeOperation = "source-over";  // restore default comp
+                // cvx!.fillRect(0, 0, offlineCanvasRef.current!.width, offlineCanvasRef.current!.height);  // apply the comp filter
+                // cvx!.globalCompositeOperation = "source-over";  // restore default comp
                 cvx?.canvas.toBlob(blob=>{
                     if (blob){
                         applyConnectedNodes(id,data,blob);
@@ -55,7 +44,6 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
                     doTheThing(data.imgData as Blob);
                 } else {
                     data.setNodes(prev=>{
-                        console.log("PO")
                         return clearConnectedNodes(prev,id,data);
                     })
                 }
@@ -93,9 +81,9 @@ const HSLNode:React.FC<HSLNodeProps> = ({data, id, selected}) => {
     <CustomNode selected={selected} id={id} inputHandle data={data}>
         <canvas hidden ref={offlineCanvasRef}></canvas>
         <div className='w-full h-full flex-1'>
-            <input onChange={handleChange} value={hsl.hue} type="range" name="hue" min={0} max={100} step={1} id="" />
-            <input onChange={handleChange} value={hsl.saturation} type="range" name="saturation" min={0} max={100} step={1} id="" />
-            <input onChange={handleChange} value={hsl.lightness} type="range" name="lightness" min={0} max={100} step={1} id="" />
+            {/* <input onChange={handleChange} value={hsl.hue} type="range" name="hue" min={0} max={100} step={1} id="" /> */}
+            <input onChange={handleChange} value={hsl} type="range" name="saturation" min={0} max={100} step={1} id="" />
+            {/* <input onChange={handleChange} value={hsl.lightness} type="range" name="lightness" min={0} max={100} step={1} id="" /> */}
             <div className='w-6 h-6 bg-gray-800 rounded-md drag-handle absolute top-4 right-4'></div>
         </div>
     </CustomNode>

@@ -30,7 +30,7 @@ const ClassificationNode: React.FC<{id: string, selected:boolean, data: NodeData
                 const bitmap = await createImageBitmap(data.imgData);
                 if (bitmap){
                     const tens = tf.browser.fromPixels(bitmap).expandDims(0).resizeBilinear([160,160]);
-                    console.log(tens.shape)
+                    console.log(tens.shape);
                     
                     const out = model.predict(tens);
                     console.log(out)

@@ -57,15 +57,26 @@ const Home: NextPage = () => {
       console.log("BLOB:", blob)
       if (blob != null) {
         const bitmap = await createImageBitmap(blob);
-        imgRef.current!.width = 1000;
-        imgRef.current!.height = 900;
+        // imgRef.current!.width = 1000;
+        // imgRef.current!.height = 900;
         const ctx = imgRef.current?.getContext("2d");
         if (ctx) {
           console.log("Actually drawing, bitmap", blob)
-          ctx.clearRect(0, 0, 1000, 900)
+          // ctx.clearRect(0, 0, 1000, 900)
           if (!connectedNodes[connectedNodes.length - 1]!.nullData){
-            console.log("STATE OF NODES AT DRAW CALL", connectedNodes)
-            ctx.drawImage(bitmap, 0, 0);
+            console.log("STATE OF NODES AT DRAW CALL", connectedNodes);
+            console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
+            const bound = imgRef.current!.getBoundingClientRect();
+            const scalingFactor = Math.min(bound.width / bitmap.width, bound.height/ bitmap.height);
+            imgRef.current!.width = bound.width;
+            imgRef.current!.height = bound.height;
+            const newWidth = bitmap.width * scalingFactor;
+            const newHeight = bitmap.height * scalingFactor;
+            let x = (imgRef.current!.width / 2) - (newWidth / 2);
+            let y = (imgRef.current!.height / 2) - (newHeight / 2);
+            console.log("BOUND", imgRef.current!.width, imgRef.current!.height);
+            console.log(bitmap.width, bitmap.height, imgRef.current!.width, imgRef.current!.height);
+            ctx.drawImage(bitmap, x,y,newWidth, newHeight);
 
 
           }
@@ -183,7 +194,7 @@ const Home: NextPage = () => {
     <>
     <main className="w-screen h-screen fixed bg-black flex">
       {newNodeMenu && <NewNodeMenu setNewNodeMenu={setNewNodeMenu} handleSelectNewNode={handleSelectNewNode}/>}
-      <div className="relative w-8/12 h-full bg-black border border-gray-500">
+      <div className="relative w-screen h-full bg-black border border-gray-500">
         { nodes[0]?.data.outputData && <button className="z-20 hover:bg-gray-900 transition-all w-32 h-12 rounded-md text-white border border-gray-500 bg-black absolute right-2 top-2" onClick={()=>setNewNodeMenu(true)}>New +</button>}
         <ReactFlow
             proOptions={proOptions}
@@ -200,9 +211,9 @@ const Home: NextPage = () => {
         </ReactFlow>
         
       </div>
-        <div className=" h-full w-4/12 bg-black border border-gray-500 z-20 overflow-y-auto flex flex-col ">
-          <div className="border overflow-auto border-gray-500 w-full h-72">
-            <canvas  ref={imgRef}></canvas>
+        <div className="absolute bottom-0 right-0 h-[30rem] w-[30rem] bg-black border border-gray-500 z-20 overflow-y-auto flex flex-col ">
+          <div className="border overflow-auto border-gray-500 w-full h-full">
+            <canvas className="w-full h-full border-8 border-red-500" ref={imgRef}></canvas>
           </div>
         </div>
     </main>

@@ -137,7 +137,7 @@ const CropNode:React.FC<{selected:boolean,id:string, data:NodeData}> = ({selecte
         })
     };
     return (
-      <CustomNode inputHandle selected={selected} id={id} data={data} overrideStyles={"!w-96 !h-96 pt-8"}>
+      <CustomNode inputHandle selected={selected} id={id} data={data} overrideStyles={"!w-96 !h-fit pt-8"}>
         <canvas className='cursor-crosshair border-2 border-gray-500' onMouseLeave={handleDragEnd} onMouseUp={handleDragEnd} onMouseDown={handleDragStart} onMouseMove={handleDrawBox} ref={localCanvasRef}></canvas>
         <canvas hidden ref={localHiddenCanvasRef}></canvas>
         <div className='absolute top-4 right-4 flex flex-row items-center h-6'>

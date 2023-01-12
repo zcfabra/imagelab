@@ -3,6 +3,7 @@ import { NodeData } from './node'
 import CustomNode from "./node"
 import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected';
 import * as tf from "@tensorflow/tfjs"
+import { classes } from '../classes';
 const ClassificationNode: React.FC<{id: string, selected:boolean, data: NodeData}> = ({data,selected,id}) => {
   
 
@@ -29,11 +30,14 @@ const ClassificationNode: React.FC<{id: string, selected:boolean, data: NodeData
             if (data.imgData != null){
                 const bitmap = await createImageBitmap(data.imgData);
                 if (bitmap){
-                    const tens = tf.browser.fromPixels(bitmap).expandDims(0).resizeBilinear([160,160]);
-                    console.log(tens.shape);
-                    
-                    const out = model.predict(tens);
-                    console.log(out)
+                    const tens = tf.browser.fromPixels(bitmap).toFloat().div(255).expandDims(0).resizeBilinear([160,160]);
+                    console.log(await tens.max().data(), await tens.min().data());
+                    const out = model.predict(tens) as tf.Tensor3D;                    
+                    console.log("PREDICTED:",out.shape);
+                    const {indices} =  out.squeeze([0]).topk(5);
+                    for (let idx of await indices.data()){
+                        console.log(classes[idx]);
+                    }
                 }
             }
         }

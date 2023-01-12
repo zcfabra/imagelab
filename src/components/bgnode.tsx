@@ -4,7 +4,6 @@ import { applyConnectedNodes, clearConnectedNodes } from '../utils/connected'
 import * as tf from "@tensorflow/tfjs"
 import * as bodySegmentation from "@tensorflow-models/body-segmentation";
 import "@tensorflow/tfjs-converter"
-import { contextProps } from '@trpc/react-query/dist/internals/context';
 const BGNode:React.FC<{data:NodeData, id: string, selected:boolean}> = ({data, id, selected}) => {
     const [model, setModel] = useState<bodySegmentation.BodySegmenter>();
 
@@ -45,16 +44,18 @@ const BGNode:React.FC<{data:NodeData, id: string, selected:boolean}> = ({data, i
                 localCanvasRef.current!.width = bitmap.width;
                 localCanvasRef.current!.height = bitmap.height;
                 const ctx = localCanvasRef.current!.getContext("2d");
-                if (ctx){
-
-                    for (let mask of out){
-                        const imgData =await mask.mask.toCanvasImageSource();
-                        
-                        ctx.drawImage(imgData, 0 ,0);
-                        ctx.canvas.toBlob(blob=>{
-                            if (blob) applyConnectedNodes(id,data,blob)})
+                const foregroundColour = {r: 0, g: 0, b: 0, a: 0};
+                const bgColour = {r: 0, g: 0, b:0, a: 255};
+                const bMask = await bodySegmentation.toBinaryMask(out, foregroundColour, bgColour, false,0.9 );
+                console.log(bitmap);
+                const tens = await tf.browser.fromPixels(bitmap);
+                await bodySegmentation.drawMask(ctx!.canvas, tens  ,bMask, 1, 5);
+                ctx?.canvas.toBlob(blob=>{
+                    if (blob){
+                        applyConnectedNodes(id,data,blob);
                     }
-                }
+                })
+
         }}
     }
     return (

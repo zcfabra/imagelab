@@ -1,8 +1,7 @@
-import React from 'react'
 export const nodeMap = {
     "Saturation": "hslNode",
     "Crop": "cropNode",
-    "Filter": "filterNode",
+    // "Filter": "filterNode",
     "Enhance": "mlNode",
     "BG Removal": "bgNode",
     "Classification": "classificationNode",
@@ -11,7 +10,7 @@ const NewNodeMenu = ({setNewNodeMenu, handleSelectNewNode}:any) => {
     const nodeTypes = [
         {name: "Saturation"},
         {name: "Crop"},
-        {name: "Filter"},
+        // {name: "Filter"},
         {name: "Enhance"},
         {name: "BG Removal"},
         {name: "Classification"}

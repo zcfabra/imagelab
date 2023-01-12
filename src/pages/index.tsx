@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import { ReactFlow, Background, Controls, Node, applyNodeChanges, NodeChange, Edge, addEdge, Connection } from "reactflow";
 import 'reactflow/dist/style.css';
 import CustomNode from "../components/node";
-import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
+import React, {  useCallback, useEffect, useRef, useState } from "react";
 import FileNode from "../components/filenode";
 import NewNodeMenu, { nodeMap } from "../components/newnodemenu";
 import HSLNode from "../components/hslnode";
@@ -32,6 +32,9 @@ const Home: NextPage = () => {
   const [newNodeMenu, setNewNodeMenu] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<number|null>(null);
   const selectedRef = useRef<number|null>(null);
+
+
+
   useEffect(()=>{
     selectedRef.current = selectedNode;
     console.log(selectedNode)
@@ -139,7 +142,7 @@ const Home: NextPage = () => {
     console.log("TYPE:",nodes[nodes.length-1]?.type)
     let lastNode = nodes[nodes.length-1];
     console.log("GG",lastNode);
-    setNodes(prev => prev.concat({ id: String(newID), dragHandle: ".drag-handle", selectable: true, position: { x: prev[prev.length - 1]!.position.x, y: prev[prev.length - 1]!.position.y +( prev[prev.length - 1]!.type! == "cropNode" ?  550 : 200) }, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
+    setNodes(prev => prev.concat({ id: String(newID), dragHandle: ".drag-handle", selectable: true, position: { x: prev[prev.length - 1]!.position.x, y: prev[prev.length - 1]!.position.y +( prev[prev.length - 1]!.type! == "cropNode" ?   550 : prev[prev.length-1]!.type! == "classificationNode"? 350 :  200) }, data: {label: nodeType, setNodes:setNodes, imgData: null,setSelectedNode: setSelectedNode, imgRef: imgRef}, type: nodeMap[nodeType as keyof object]}))
     setLastCreatedNode(newID); 
   }
   const onConnect = useCallback(
